@@ -1,25 +1,20 @@
-# Project Title
-> Oneliner about your project 
+# Analysis example using RMarkdown and GitHub
+> Short example for how RMarkdown and GitHub work together for data analysis and writing
 
 ## Abstract
-Paste your Abstract in here.
+-
 
 ## Publication Links
-- [Journal](https://#)
-- [Preprint](https://#)
-- [OSF](https://#)
-- [Zenodo](https://#)
-- [Figshare](https://#)
-
+- 
 ## Repository Structure
 ### data
-You can retrieve the data here ...
+- data can be found in `data/`
 
 ### docs
 Procedures and coding schema can be found here. It is structured like this... 
+- analysis scripts are in `analysis/`
+- figures are in `analysis/figures/`
 
 
 
-## Installation Instructions
-lalaliii
 

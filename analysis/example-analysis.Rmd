@@ -1,0 +1,145 @@
+---
+title: "Example Analysis"
+output: html_document
+---
+
+Here's an example for how to use `RMarkdown` and `GitHub` to analyze your data. This file shows how to use `RMarkdown` for your analysis scripts.  
+
+## Getting started
+
+Everything that is written in the code chunks below, is interpreted as `R` code. 
+
+I use the first chunk to specify the libraries that I use for the analysis. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggthemes)
+library(tidyboot)
+library(ggpubr)
+library(lme4)
+library(brms)
+```
+
+## Loading data
+
+I use the next code chunk to load the data. I use relative paths to load the data, that is, I specify where the data is relative to the file I'm in (assuming your working directory is set to "source file location": **Session** -> **Set Working Directory** -> **To Source File Location**). This works really well in combination with `GitHub` becasue everybody who works off the repository can use the same code. 
+
+The data here is located in a folder called `data`, which is located one level up from the `analysis` folder I'm in. So, to locate the file, I move one level up with `../`, move inside the `data` folder (`../data/`) and locate the file: `../data/data.csv`.
+
+```{r}
+data <- read.csv("../data/data.csv")
+```
+## Descriptives
+
+Now the data is loaded and we can take a look. The great thing about `RMarkdown` and the code chunks is that the output of each computation is displayed directly below the code chunk. This works for plots as well as regular `R` code. You can run all the code in a chunk by clicking on the green "Play" button on its upper left. 
+
+Fo example, you can look at the entire data file by running the code below. 
+
+```{r}
+data
+```
+This also works for summaries: 
+
+```{r}
+str(data)
+```
+
+or descriptives:
+
+(btw: I'm using `tidyverse` and pipe `%>%` notation for most of my code).
+
+```{r}
+data %>%
+  group_by(task, age_group)%>%
+  summarise(n = length(unique(id)))
+```
+
+We can see that we have two different tasks and two age groups in the data file. Each cell has data from 27 participants. The data file we have here is from a study in which we tested children between 3 and 5 with two different pragmatic inference tasks (five trials per task). Children always chose between two objects, so chance level of being correct was 0.5. Let's plot the results.
+
+## Visualizing the data
+
+First we look at the performance in each task. We will plot individual performance, performance by age group (to compare with chance) and an age slope. The plot will be shown directly underneath the code chunk.
+
+```{r}
+# the first data frame contains the individual means (across trials)
+plot1 <- data%>%
+  group_by(id,age, age_group,task)%>%
+  summarise(mean = mean(correct)) # compute the mean for each participant in each task 
+
+# the second data frame contains the age group means with 95% CIs
+plot2 <- plot1 %>%
+  group_by(age_group,task)%>%
+  tidyboot_mean(column = mean) # this function computes 95% CIs based on a non-parametric bootstrap
+
+
+ggplot()+
+  geom_hline(yintercept = 0.5, lty = 2)+ # chance line
+  geom_point(data = plot1, aes(x = age, y = mean), alpha = .5)+ # individual means (size = no of participants with that score)
+  geom_pointrange(data = plot2, aes(x = as.numeric(as.character(age_group))+.5, y = mean, ymin = ci_lower, ymax = ci_upper))+ # age group means with 95%CI (located in the middle of the age)
+  geom_smooth(data = plot1, aes(x = age, y = mean), method = "glm", col = "black", size = 1)+ # age slope
+  facet_wrap(~task)+ # use a different facet for each task
+  labs(x = "Age Group", y = "Proportion Correct")+ # set lab names
+  ylim(-0.05, 1.05)+ # tweak the axis
+  theme_minimal() # style of the coordination system
+```
+Now we can also look at the correlation between the two tasks:
+
+```{r}
+# we already computed the mean for each task in plot1 above, now we simply need to re-arrange the data file to plot the correlation
+plot3 <- plot1 %>%
+  pivot_wider(names_from = "task", values_from = "mean")
+
+# this time we save the plot so we can call it later
+cor_plot <- ggplot(plot3, aes(x= ad_hoc_implicature, simple_inf, col = factor(age_group)))+
+  geom_abline(intercept = 0, slope = 1, lty = 2, alpha = .75)+ # line showing perfect correlation
+  geom_count(alpha = .5)+ # individual means, size according to participants with that score
+  stat_cor(inherit.aes = F, aes(x= ad_hoc_implicature, simple_inf))+ # add correlation coefficient
+  theme_minimal()+
+  ylim(-0.05, 1.05)+ 
+  xlim(-0.05, 1.05)+ 
+  scale_color_colorblind(name = "Age Group")
+ 
+cor_plot # call the plot to show it  
+```
+
+You can export these graphs using e.g. `ggsave()`. Let's save the correlation plot as a `.png` file to the folder `figures/`.
+
+```{r}
+ggsave("figures/correlation-plot.png", cor_plot,
+       height = 4, # modify the height of the plot
+       width = 6, # modify the width
+       scale = 1 # scale the plot (i.e. zoom in or out)
+       )
+```
+
+## Analyzing the data
+
+Finally, let's run a quick model to check if children get better with age in the `ad_hoc_implicature` task. Here we will analyze the trial by trial data.
+
+```{r}
+model_data <- data %>%
+  filter(task == "ad_hoc_implicature")%>% # select the task
+  mutate(age = scale(age)) # center age
+
+model1 <- glmer(correct ~ age + (1|id),
+                family = binomial,
+                data = model_data)
+
+summary(model1) # model summary
+```
+
+Finally, let's run the same model in a Bayesian framework. This takes a bit longer.
+
+```{r}
+
+bayes_model1 <- brm(correct ~ age + (1|id),
+                family = bernoulli(),
+                data = model_data)
+
+summary(bayes_model1)
+
+```
+
+A script like this can be used to explore the data and the analysis. If you want to use a similar workflow to write your paper, check out the file `example-manuscript.Rmd`.
