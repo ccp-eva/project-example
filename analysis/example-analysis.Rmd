@@ -24,13 +24,14 @@ library(brms)
 
 ## Loading data
 
-I use the next code chunk to load the data. I use relative paths to load the data, that is, I specify where the data is relative to the file I'm in (assuming your working directory is set to "source file location": **Session** -> **Set Working Directory** -> **To Source File Location**). This works really well in combination with `GitHub` becasue everybody who works off the repository can use the same code. 
+I use the next code chunk to load the data. I use relative paths to load the data, that is, I specify where the data is relative to the file I'm in (assuming your working directory is set to "source file location": **Session** -> **Set Working Directory** -> **To Source File Location**). This works really well in combination with `GitHub` because everybody who works off the repository can use the same code. 
 
 The data here is located in a folder called `data`, which is located one level up from the `analysis` folder I'm in. So, to locate the file, I move one level up with `../`, move inside the `data` folder (`../data/`) and locate the file: `../data/data.csv`.
 
 ```{r}
 data <- read.csv("../data/data.csv")
 ```
+
 ## Descriptives
 
 Now the data is loaded and we can take a look. The great thing about `RMarkdown` and the code chunks is that the output of each computation is displayed directly below the code chunk. This works for plots as well as regular `R` code. You can run all the code in a chunk by clicking on the green "Play" button on its upper left. 
