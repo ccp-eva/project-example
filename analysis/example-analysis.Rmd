@@ -14,12 +14,12 @@ I use the first chunk to specify the libraries that I use for the analysis.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(tidyverse)
-library(ggthemes)
-library(tidyboot)
-library(ggpubr)
-library(lme4)
-library(brms)
+require(tidyverse)
+require(ggthemes)
+require(tidyboot)
+require(ggpubr)
+require(lme4)
+require(brms)
 ```
 
 ## Loading data
