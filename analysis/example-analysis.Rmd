@@ -5,7 +5,7 @@ output: html_document
 
 Here's an example for how to use `RMarkdown` and `GitHub` to analyze your data. This file shows how to use `RMarkdown` for your analysis scripts.  
 
-## Getting started
+## Getting started hallo dude
 
 Everything that is written in the code chunks below, is interpreted as `R` code. 
 
