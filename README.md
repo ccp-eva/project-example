@@ -1,4 +1,4 @@
-# Analysis example using RMarkdown and GitHub
+# Analysis Example using RMarkdown and GitHub
 > Short example for how RMarkdown and GitHub work together for data analysis and writing
 
 ## Abstract
